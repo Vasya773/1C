@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python main.py
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - ONE_C_BASE_URL=${ONE_C_BASE_URL:-http://176.192.70.122:
