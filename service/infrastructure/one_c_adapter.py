@@ -45,3 +45,11 @@ class OneCAdapter(EmployeeRepository):
         except requests.exceptions.RequestException as e:
             print(f"Error during request to 1C: {e}")
             return []
+
+    def get_employee_by_id(self, club_id: str, employee_id: str) -> Optional[Employee]:
+        employees = self.get_employees(club_id)
+        for employee in employees:
+            if employee.id == employee_id:
+                return employee
+        return None
+
