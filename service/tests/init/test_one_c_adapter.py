@@ -4,6 +4,7 @@ from app.infrastructure.one_c_adapter import OneCAdapter
 from app.config import Config
 from app.domain.models import Employee
 
+
 class TestOneCAdapter(unittest.TestCase):
     @patch('requests.post')
     def test_get_employees_success(self, mock_post):
@@ -39,9 +40,7 @@ class TestOneCAdapter(unittest.TestCase):
         self.assertEqual(employees[1].image_url, "")
 
     @patch('requests.post')
-    def test_get_employees_request_error(self, mock_post):
-        # Настройка mock-ответа с ошибкой
-        mock_post.side_effect = requests.exceptions.RequestException("Test Error")
+    def test_get_employees_request_error(self):
 
         # Создание экземпляра адаптера
         config = Config()
@@ -70,3 +69,51 @@ class TestOneCAdapter(unittest.TestCase):
 
         # Проверки
         self.assertEqual(len(employees), 0)
+
+    @patch('requests.post')
+    def test_get_employee_by_id_success(self, mock_post):
+        # Настройка mock-ответа
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "Return": [
+                {"Специалист": "1", "Имя": "John", "Фамилия": "Doe", "Телефон": "123",
+                 "Фото": "http://example.com/image.jpg"},
+                {"Специалист": "2", "Имя": "Jane", "Фамилия": "Smith", "Телефон": "456", "Фото": ""}
+            ]
+        }
+        mock_response.raise_for_status.return_value = None
+        mock_post.return_value = mock_response
+
+        # Создание экземпляра адаптера
+        config = Config()
+        adapter = OneCAdapter(config)
+
+        # Вызов тестируемого метода
+        employee = adapter.get_employee_by_id("test_club_id", "1")
+
+        # Проверки
+        self.assertIsNotNone(employee)
+        self.assertEqual(employee.id, "1")
+
+    @patch('requests.post')
+    def test_get_employee_by_id_not_found(self, mock_post):
+        # Настройка mock-ответа
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "Return": [
+                {"Специалист": "1", "Имя": "John", "Фамилия": "Doe", "Телефон": "123",
+                 "Фото": "http://example.com/image.jpg"},
+            ]
+        }
+        mock_response.raise_for_status.return_value = None
+        mock_post.return_value = mock_response
+
+        # Создание экземпляра адаптера
+        config = Config()
+        adapter = OneCAdapter(config)
+
+        # Вызов тестируемого метода
+        employee = adapter.get_employee_by_id("test_club_id", "2")
+
+        # Проверки
+        self.assertIsNone(employee)

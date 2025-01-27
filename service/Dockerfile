@@ -1,5 +1,5 @@
 # Используем официальный образ Python
-FROM python:3.12-slim-buster
+FROM python:3.12-slim
 
 # Устанавливаем Poetry
 RUN pip install --no-cache-dir poetry
@@ -12,7 +12,7 @@ COPY poetry.lock pyproject.toml /app/
 
 # Устанавливаем зависимости с помощью Poetry (без dev-зависимостей)
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-interaction --no-ansi
+    poetry install --no-interaction --no-ansi --no-root
 
 # Копируем все файлы приложения в контейнер
 COPY . /app/

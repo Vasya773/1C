@@ -3,6 +3,9 @@ from app import create_app
 from app.config import Config
 from unittest.mock import patch
 
+from service.domain.models import Employee
+
+
 class TestTeamController(unittest.TestCase):
     def setUp(self):
         # Создание тестового приложения
@@ -35,3 +38,30 @@ class TestTeamController(unittest.TestCase):
         self.assertEqual(data[1]["phone"], "456")
         self.assertEqual(data[1]["image_url"], "")
         mock_get_all_employees.assert_called_once_with("test_club_id")
+
+    @patch('app.services.employee_service.EmployeeService.get_employee_by_id')
+    def test_get_employee_endpoint_success(self, mock_get_employee_by_id):
+        # Настройка mock-сервиса
+        mock_get_employee_by_id.return_value = Employee(id="1", name="John", last_name="Doe", phone="123",
+                                                        image_url="http://example.com/image.jpg")
+
+        # Выполнение запроса к эндпоинту
+        response = self.client.get('/team/get_employee/1?club_id=test_club_id')
+
+        # Проверки
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertEqual(data["id"], "1")
+        mock_get_employee_by_id.assert_called_once_with("test_club_id", "1")
+
+    @patch('app.services.employee_service.EmployeeService.get_employee_by_id')
+    def test_get_employee_endpoint_not_found(self, mock_get_employee_by_id):
+        # Настройка mock-сервиса
+        mock_get_employee_by_id.return_value = None
+
+        # Выполнение запроса к эндпоинту
+        response = self.client.get('/team/get_employee/2?club_id=test_club_id')
+
+        # Проверки
+        self.assertEqual(response.status_code, 404)
+        mock_get_employee_by_id.assert_called_once_with("test_club_id", "2")
