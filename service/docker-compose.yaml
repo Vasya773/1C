@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python main.py
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+
+  linter:
+    build: .
+    command: /bin/bash -c "poetry run flake8 ./app && poetry run mypy ./app"
+    volumes:
+      - .:/app
